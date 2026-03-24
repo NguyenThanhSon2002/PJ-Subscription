@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Student Management</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+      }
+
+      h2 {
+        margin-top: 30px;
+      }
+
+      form input {
+        margin: 5px;
+        padding: 5px;
+      }
+
+      button {
+        margin-top: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      td,
+      th {
+        border: 1px solid #ccc;
+        padding: 10px;
+        vertical-align: top;
+      }
+
+      .class-box {
+        border: 1px solid #999;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Student Management</h1>
+
+    <!-- Parent Form -->
+    <h2>Create Parent</h2>
+    <form id="parentForm">
+      <input placeholder="Name" id="p_name" required autofocus />
+      <input placeholder="Phone" id="p_phone" />
+      <input placeholder="Email" id="p_email" />
+      <button type="submit">Create</button>
+    </form>
+
+    <!-- Student Form -->
+    <h2>Create Student</h2>
+    <form id="studentForm">
+      <input placeholder="Name" id="s_name" required />
+      <input placeholder="Parent ID" id="s_parent_id" required />
+      <button type="submit">Create</button>
+    </form>
+
+    <!-- Select Student -->
+    <h2>Register Class</h2>
+    <input placeholder="Enter Student ID" id="studentId" />
+
+    <!-- Class Table -->
+    <table>
+      <thead>
+        <tr id="headerRow"></tr>
+      </thead>
+      <tbody>
+        <tr id="classRow"></tr>
+      </tbody>
+    </table>
+
+    <script>
+      const BASE_URL = "http://localhost:8080/api";
+      const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+      // ===== INIT TABLE =====
+      const headerRow = document.getElementById("headerRow");
+      const classRow = document.getElementById("classRow");
+
+      days.forEach((day) => {
+        headerRow.innerHTML += `<th>${day}</th>`;
+        classRow.innerHTML += `<td id="${day}"></td>`;
+      });
+
+      // ===== LOAD CLASSES =====
+      async function loadClasses() {
+        for (let day of days) {
+          const res = await fetch(`${BASE_URL}/classes?day=${day}`);
+          const data = await res.json();
+
+          const cell = document.getElementById(day);
+          cell.innerHTML = "";
+
+          data.forEach((cls) => {
+            const div = document.createElement("div");
+            div.className = "class-box";
+
+            div.innerHTML = `
+            <b>${cls.name}</b><br>
+            ${cls.time_slot}<br>
+            ${cls.teacher_name}<br>
+            <button onclick="register(${cls.id})">Register</button>
+          `;
+
+            cell.appendChild(div);
+          });
+        }
+      }
+
+      // ===== REGISTER =====
+      async function register(classId) {
+        const studentId = document.getElementById("studentId").value;
+
+        if (!studentId) {
+          alert("Enter student ID!");
+          return;
+        }
+
+        const res = await fetch(`${BASE_URL}/classes/${classId}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id: studentId }),
+        });
+
+        if (res.ok) {
+          alert("Registered!");
+        } else {
+          const err = await res.text();
+          alert("Error: " + err);
+        }
+      }
+
+      // ===== CREATE PARENT =====
+      document.getElementById("parentForm").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const data = {
+          name: document.getElementById("p_name").value,
+          phone: document.getElementById("p_phone").value,
+          email: document.getElementById("p_email").value,
+        };
+
+        await fetch(`${BASE_URL}/parents`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        alert("Parent created!");
+      };
+
+      // ===== CREATE STUDENT =====
+      document.getElementById("studentForm").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const data = {
+          name: document.getElementById("s_name").value,
+          parent_id: document.getElementById("s_parent_id").value,
+        };
+
+        await fetch(`${BASE_URL}/students`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        alert("Student created!");
+      };
+
+      // ===== INIT =====
+      loadClasses();
+    </script>
+  </body>
+</html>

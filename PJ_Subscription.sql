@@ -2,54 +2,53 @@ DROP DATABASE IF EXISTS Subscription;
 CREATE DATABASE Subscription;
 USE Subscription;
 
-DROP TABLE IF EXISTS Department;
+DROP TABLE IF EXISTS Parents;
 CREATE TABLE Parents (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) UNIQUE,
-    email VARCHAR(100) UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Phone VARCHAR(20) NOT NULL UNIQUE KEY,
+    Email VARCHAR(100) NOT NULL UNIQUE KEY
 );
 
-CREATE TABLE students (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    dob DATE,
-    gender ENUM('MALE', 'FEMALE', 'OTHER'),
-    current_grade VARCHAR(20),
-    parent_id BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES parents(id)
+DROP TABLE IF EXISTS Students;
+CREATE TABLE Students (
+    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Dob DATE NOT NULL,
+    Gender ENUM('MALE', 'FEMALE', 'OTHER') NOT NULL,
+    Current_grade VARCHAR(20) NOT NULL,
+    Parent_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY (Parent_id) REFERENCES Parents(Id)
 );
 
-CREATE TABLE classes (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    subject VARCHAR(50),
-    day_of_week ENUM('MON','TUE','WED','THU','FRI','SAT','SUN'),
-    time_slot VARCHAR(50),
-    teacher_name VARCHAR(100),
-    max_students INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+DROP TABLE IF EXISTS Classes;
+CREATE TABLE Classes (
+    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Subject VARCHAR(50) NOT NULL,
+    Day_of_week ENUM('MON','TUE','WED','THU','FRI','SAT','SUN') NOT NULL,
+    Time_slot VARCHAR(50) NOT NULL,
+    Teacher_name VARCHAR(100) NOT NULL,
+    Max_students INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE class_registrations (
-    class_id BIGINT,
-    student_id BIGINT,
-    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (class_id, student_id),
-    FOREIGN KEY (class_id) REFERENCES classes(id),
-    FOREIGN KEY (student_id) REFERENCES students(id)
+DROP TABLE IF EXISTS Class_registrations;
+CREATE TABLE Class_registrations (
+    Class_id INT UNSIGNED NOT NULL,
+    Student_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (Class_id, Student_id),
+    FOREIGN KEY (Class_id) REFERENCES Classes(Id),
+    FOREIGN KEY (Student_id) REFERENCES Students(Id)
 );
 
-CREATE TABLE subscriptions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    student_id BIGINT,
-    package_name VARCHAR(100),
-    start_date DATE,
-    end_date DATE,
-    total_sessions INT,
-    used_sessions INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES students(id)
+DROP TABLE IF EXISTS Subscriptions;
+CREATE TABLE Subscriptions (
+    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Student_id INT UNSIGNED NOT NULL,
+    Package_name VARCHAR(100) NOT NULL,
+    Start_date DATE NOT NULL,
+    End_date DATE NOT NULL,
+    Total_sessions INT NOT NULL,
+    Used_sessions INT DEFAULT 0 NOT NULL,
+    FOREIGN KEY (Student_id) REFERENCES Students(id)
 );
